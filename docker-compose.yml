@@ -1,0 +1,38 @@
+services:
+  npm:
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    restart: always
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - data:/data
+
+  godaddy-ddns:
+    build: .
+    container_name: godaddy-ddns
+    restart: always
+    environment:
+      - GODADDY_API_KEY=${GODADDY_API_KEY}
+      - GODADDY_API_SECRET=${GODADDY_API_SECRET}
+      - DOMAINS=${DOMAINS}
+      - INTERVAL=${INTERVAL}
+    env_file:
+      - .env
+
+volumes:
+  data:
